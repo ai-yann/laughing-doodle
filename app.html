@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrillMaster Logistics</title>
+    <style>
+        :root {
+            --primary: #e63946;
+            --secondary: #f1faee;
+            --accent: #a8dadc;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+            --success: #2a9d8f;
+            --warning: #e9c46a;
+            --danger: #e76f51;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            grid-template-rows: auto 1fr;
+            min-height: 100vh;
+        }
+        
+        /* Header Styles */
+        header {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--dark), #2a4a6f);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            padding: 2rem 0;
+        }
+        
+        .nav-item {
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--secondary);
+            border-left: 4px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .nav-item i {
+            font-size: 1.2rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .page-title {
+            margin-bottom: 2rem;
+            color: var(--dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, var(--accent), #b9e5e8);
+            border-radius: 10px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .metric-icon {
+            background: rgba(255,255,255,0.2);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .metric-info h3 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-info p {
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: var(--dark);
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status.in-stock {
+            background-color: rgba(42, 157, 143, 0.1);
+            color: var(--success);
+        }
+        
+        .status.low-stock {
+            background-color: rgba(233, 196, 106, 0.1);
+            color: var(--warning);
+        }
+        
+        .status.out-of-stock {
+            background-color: rgba(231, 111, 81, 0.1);
+            color: var(--danger);
+        }
+        
+        .status.shipped {
+            background-color: rgba(42, 157, 143, 0.1);
+            color: var(--success);
+        }
+        
+        .status.in-transit {
+            background-color: rgba(233, 196, 106, 0.1);
+            color: var(--warning);
+        }
+        
+        .status.delayed {
+            background-color: rgba(231, 111, 81, 0.1);
+            color: var(--danger);
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: var(--accent);
+            color: var(--dark);
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .map-container {
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 1rem;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .alert-warning {
+            background-color: rgba(233, 196, 106, 0.2);
+            color: var(--warning);
+        }
+        
+        .alert-danger {
+            background-color: rgba(231, 111, 81, 0.2);
+            color: var(--danger);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                z-index: 100;
+                padding: 0;
+            }
+            
+            .nav-item {
+                justify-content: center;
+                padding: 1rem;
+            }
+            
+            .nav-item span {
+                display: none;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <i class="fas fa-fire fa-2x"></i>
+                <h1>GrillMaster Logistics</h1>
+            </div>
+            <div class="user-info">
+                <div class="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="profile">
+                    <i class="fas fa-user-circle fa-2x"></i>
+                    <span>Yann Stoneman</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="nav-item active" data-page="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" data-page="inventory">
+                <i class="fas fa-boxes"></i>
+                <span>Inventory</span>
+            </div>
+            <div class="nav-item" data-page="orders">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Orders</span>
+            </div>
+            <div class="nav-item" data-page="shipments">
+                <i class="fas fa-truck"></i>
+                <span>Shipments</span>
+            </div>
+            <div class="nav-item" data-page="suppliers">
+                <i class="fas fa-truck-loading"></i>
+                <span>Suppliers</span>
+            </div>
+            <div class="nav-item" data-page="reports">
+                <i class="fas fa-chart-bar"></i>
+                <span>Reports</span>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="page-title">
+                    <h2>Dashboard Overview</h2>
+                    <button class="btn btn-primary"><i class="fas fa-sync"></i> Refresh Data</button>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>1,247</h3>
+                            <p>Total Units in Stock</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>42</h3>
+                            <p>Open Orders</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>8</h3>
+                            <p>Shipments in Transit</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>15</h3>
+                            <p>Low Stock Alerts</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Recent Activity</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Activity</th>
+                                    <th>Details</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025-10-14</td>
+                                    <td>Order Shipped</td>
+                                    <td>Order #GR-8942 to Texas BBQ Supplies</td>
+                                    <td><span class="status shipped">Shipped</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2025-10-13</td>
+                                    <td>Inventory Alert</td>
+                                    <td>Charcoal Briquettes (SKU: CB-2000) low stock</td>
+                                    <td><span class="status low-stock">Low Stock</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2025-10-12</td>
+                                    <td>New Order Received</td>
+                                    <td>Order #GR-8941 from Smoky Mountain Grills</td>
+                                    <td><span class="status in-stock">Processing</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2025-10-11</td>
+                                    <td>Shipment Delayed</td>
+                                    <td>Stainless Steel Grates shipment from Factory #3</td>
+                                    <td><span class="status delayed">Delayed</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Shipment Tracking</h3>
+                    <div class="map-container">
+                        <i class="fas fa-map-marked-alt fa-3x"></i>
+                        <span>Interactive Map View</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Inventory Page -->
+            <div id="inventory" class="page">
+                <div class="page-title">
+                    <h2>Inventory Management</h2>
+                    <button class="btn btn-primary"><i class="fas fa-plus"></i> Add New Item</button>
+                </div>
+                
+                <div class="card">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>15 items are currently low in stock. Review inventory levels.</span>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Category</th>
+                                    <th>Stock Level</th>
+                                    <th>Unit Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Premium Charcoal Grill</td>
+                                    <td>PG-1000</td>
+                                    <td>Grills</td>
+                                    <td>42</td>
+                                    <td>$499.99</td>
+                                    <td><span class="status in-stock">In Stock</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-sync"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Smoker Thermometer</td>
+                                    <td>ST-500</td>
+                                    <td>Accessories</td>
+                                    <td>8</td>
+                                    <td>$29.99</td>
+                                    <td><span class="status low-stock">Low Stock</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-sync"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Charcoal Briquettes (20lb)</td>
+                                    <td>CB-2000</td>
+                                    <td>Consumables</td>
+                                    <td>3</td>
+                                    <td>$19.99</td>
+                                    <td><span class="status out-of-stock">Out of Stock</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-sync"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- More inventory items... -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Orders Page -->
+            <div id="orders" class="page">
+                <div class="page-title">
+                    <h2>Order Management</h2>
+                    <button class="btn btn-primary"><i class="fas fa-plus"></i> Create New Order</button>
+                </div>
+                
+                <div class="card">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>GR-8942</td>
+                                    <td>Texas BBQ Supplies</td>
+                                    <td>2025-10-10</td>
+                                    <td>5</td>
+                                    <td>$2,499.95</td>
+                                    <td><span class="status shipped">Shipped</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-truck"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>GR-8941</td>
+                                    <td>Smoky Mountain Grills</td>
+                                    <td>2025-10-09</td>
+                                    <td>3</td>
+                                    <td>$1,499.97</td>
+                                    <td><span class="status in-transit">In Transit</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-truck"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>GR-8940</td>
+                                    <td>Backyard BBQ Co.</td>
+                                    <td>2025-10-08</td>
+                                    <td>2</td>
+                                    <td>$999.98</td>
+                                    <td><span class="status delayed">Delayed</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-truck"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- More orders... -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shipments Page -->
+            <div id="shipments" class="page">
+                <div class="page-title">
+                    <h2>Shipment Tracking</h2>
+                    <button class="btn btn-primary"><i class="fas fa-plus"></i> Create Shipment</button>
+                </div>
+                
+                <div class="card">
+                    <div class="map-container">
+                        <i class="fas fa-map-marked-alt fa-3x"></i>
+                        <span>Live Shipment Tracking</span>
+                    </div>
+                    
+                    <div class="table-container" style="margin-top: 2rem;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Shipment ID</th>
+                                    <th>Origin</th>
+                                    <th>Destination</th>
+                                    <th>Carrier</th>
+                                    <th>Status</th>
+                                    <th>ETA</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>SH-5671</td>
+                                    <td>Warehouse A</td>
+                                    <td>Dallas, TX</td>
+                                    <td>FedEx Freight</td>
+                                    <td><span class="status shipped">Shipped</span></td>
+                                    <td>2025-10-16</td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-sync"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>SH-5670</td>
+                                    <td>Factory #3</td>
+                                    <td>Atlanta, GA</td>
+                                    <td>UPS Ground</td>
+                                    <td><span class="status in-transit">In Transit</span></td>
+                                    <td>2025-10-15</td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-sync"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>SH-5669</td>
+                                    <td>Warehouse B</td>
+                                    <td>Chicago, IL</td>
+                                    <td>Old Dominion</td>
+                                    <td><span class="status delayed">Delayed</span></td>
+                                    <td>2025-10-18</td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-sync"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- More shipments... -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Suppliers Page -->
+            <div id="suppliers" class="page">
+                <div class="page-title">
+                    <h2>Supplier Management</h2>
+                    <button class="btn btn-primary"><i class="fas fa-plus"></i> Add New Supplier</button>
+                </div>
+                
+                <div class="card">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Supplier Name</th>
+                                    <th>Contact</th>
+                                    <th>Products</th>
+                                    <th>Lead Time</th>
+                                    <th>Performance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>MetalWorks Inc.</td>
+                                    <td>(555) 123-4567</td>
+                                    <td>Grill Bodies, Racks</td>
+                                    <td>14 days</td>
+                                    <td><span class="status in-stock">Excellent</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-file-alt"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>ThermoTech Solutions</td>
+                                    <td>(555) 987-6543</td>
+                                    <td>Thermometers, Gauges</td>
+                                    <td>7 days</td>
+                                    <td><span class="status low-stock">Good</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-file-alt"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Charcoal Suppliers Co.</td>
+                                    <td>(555) 456-7890</td>
+                                    <td>Briquettes, Lump Charcoal</td>
+                                    <td>5 days</td>
+                                    <td><span class="status out-of-stock">Poor</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-primary"><i class="fas fa-file-alt"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- More suppliers... -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reports Page -->
+            <div id="reports" class="page">
+                <div class="page-title">
+                    <h2>Analytics & Reports</h2>
+                    <div class="date-range">
+                        <input type="date" id="start-date">
+                        <span>to</span>
+                        <input type="date" id="end-date">
+                        <button class="btn btn-primary"><i class="fas fa-chart-line"></i> Generate Report</button>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Inventory Turnover</h3>
+                        <div class="chart-placeholder" style="height: 200px; background: #f0f4f8; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-chart-bar fa-2x" style="color: #a8dadc;"></i>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Order Fulfillment Rate</h3>
+                        <div class="chart-placeholder" style="height: 200px; background: #f0f4f8; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-chart-line fa-2x" style="color: #a8dadc;"></i>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Shipping Performance</h3>
+                        <div class="chart-placeholder" style="height: 200px; background: #f0f4f8; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-truck fa-2x" style="color: #a8dadc;"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Custom Report Builder</h3>
+                    <div class="form-group">
+                        <label>Report Type</label>
+                        <select>
+                            <option>Inventory Valuation</option>
+                            <option>Order History</option>
+                            <option>Shipment Performance</option>
+                            <option>Supplier Scorecard</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Group By</label>
+                        <select>
+                            <option>Product Category</option>
+                            <option>Region</option>
+                            <option>Supplier</option>
+                            <option>Time Period</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary"><i class="fas fa-file-export"></i> Generate Custom Report</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Page navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                item.classList.add('active');
+                
+                // Show corresponding page
+                const pageId = item.getAttribute('data-page');
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById(pageId).classList.add('active');
+            });
+        });
+        
+        // Sample data for charts (would be replaced with real data in production)
+        // This is just placeholder code
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simulate chart loading
+            const chartPlaceholders = document.querySelectorAll('.chart-placeholder');
+            chartPlaceholders.forEach(placeholder => {
+                // In a real app, we'd use a charting library like Chart.js here
+                const icon = placeholder.querySelector('i');
+                if (icon) {
+                    icon.style.color = '#457b9d';
+                }
+            });
+            
+            // Set default dates for reports
+            const today = new Date();
+            const startDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+            document.getElementById('start-date').valueAsDate = startDate;
+            document.getElementById('end-date').valueAsDate = today;
+        });
+    </script>
+</body>
+</html>
